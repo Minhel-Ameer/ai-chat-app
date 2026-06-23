@@ -12,6 +12,13 @@ A modern AI-powered chat application built with React, TypeScript, Material UI, 
 * Persistent chat history
 * Responsive design
 * Auto-scroll to latest message
+* Search conversations
+* Rename conversations
+* Delete conversations
+* Auto-title from first message
+* Error notifications
+* Mobile-friendly drawer navigation
+* Abort ongoing requests on new message
 
 ## Tech Stack
 
@@ -45,8 +52,10 @@ npm install
 Create a `.env` file in the project root:
 
 ```env
-VITE_MISTRAL_API_KEY=your_mistral_api_key
+MISTRAL_API_KEY=your_mistral_api_key
 ```
+
+> ⚠️ Never commit your `.env` file. It is already listed in `.gitignore`.
 
 ### 4. Run the application
 
@@ -64,14 +73,14 @@ http://localhost:5173
 
 ## Environment Variables
 
-### VITE_MISTRAL_API_KEY
+### MISTRAL_API_KEY
 
-Required for authenticating requests to the Mistral AI API.
+Required for authenticating requests to the Mistral AI API. This key is kept secret and only accessed server-side via a Vercel serverless function — it is never exposed to the browser.
 
 Example:
 
 ```env
-VITE_MISTRAL_API_KEY=xxxxxxxxxxxxxxxx
+MISTRAL_API_KEY=xxxxxxxxxxxxxxxx
 ```
 
 ---
@@ -120,11 +129,13 @@ Build Command: npm run build
 Output Directory: dist
 ```
 
-6. Add Environment Variable:
+6. Add Environment Variable in Vercel Dashboard → Settings → Environment Variables:
 
 ```env
-VITE_MISTRAL_API_KEY=your_mistral_api_key
+MISTRAL_API_KEY=your_mistral_api_key
 ```
+
+> ⚠️ Do not use the `VITE_` prefix — this would expose the key to the browser.
 
 7. Click **Deploy**.
 
@@ -152,6 +163,16 @@ Production deployment:
 
 ```bash
 vercel --prod
+```
+
+---
+
+## API Security
+
+The Mistral API key is kept secure using a Vercel serverless function (`api/chat.ts`). The frontend never directly calls the Mistral API — all requests are proxied through this function, keeping the API key server-side only.
+
+```text
+Browser → /api/chat (Vercel serverless) → Mistral AI API
 ```
 
 ---
