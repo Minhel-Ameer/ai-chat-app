@@ -10,6 +10,7 @@ import {
   ListItemButton,
   Typography,
   TextField,
+  Snackbar,
 } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from "@mui/icons-material/Edit";
@@ -41,6 +42,7 @@ export default function ConversationSidebar() {
   const [editText, setEditText] = useState('')
   const [editingId, setEditingId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [snackOpen, setSnackOpen] = useState(false);
 
   useEffect(() => {
       if (!conversations.length) {
@@ -52,9 +54,17 @@ const handleNewChat = () => {
     const activeConversation = conversations.find((c) => c.id === activeId);
 
     if (activeConversation && activeConversation.messages.length === 0) {
+      setSnackOpen(true);
       if (isMobile) setOpen(false);
       return;
     }
+
+    <Snackbar
+      open={snackOpen}
+      autoHideDuration={3000}
+      onClose={() => setSnackOpen(false)}
+      message="New chat already exists"
+    />
 
     const newConv = createConversation();
     const updated = [newConv, ...conversations];
