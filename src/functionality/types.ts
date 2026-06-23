@@ -11,6 +11,6 @@ export interface Conversation {
     id: string
     label: string
     messages: Message[]
-    createdAt: any
+    createdAt: string
     title: string
   }

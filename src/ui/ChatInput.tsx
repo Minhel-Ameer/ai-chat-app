@@ -5,18 +5,18 @@ import { useChatStore } from "../storage/store";
 
 export default function ChatInput() {
   const [text, setText] = useState("");
-  const loading = useChatStore((s) => s.loading);
+
+  const loading = useChatStore((s) => s.loadingByConversation);
+  const activeId = useChatStore((s) => s.activeId);
 
   const handleSend = async () => {
-    if (!text.trim()) return;
+    if (!text.trim() || !activeId) return;
 
     const message = text;
     setText("");
 
     try {
-      // 🚀 ONLY ONE SOURCE OF TRUTH
-      await sendMessageFlow(message);
-
+      await sendMessageFlow(message, activeId);
     } catch (error) {
       console.error("Send failed:", error);
     }
@@ -51,9 +51,9 @@ export default function ChatInput() {
       <Button
         variant="contained"
         onClick={handleSend}
-        disabled={!text.trim() || loading}
+        disabled={!text.trim() || loading[activeId] || !activeId}
       >
-        {loading ? "Sending..." : "Send"}
+        {loading[activeId] ? "Sending..." : "Send"}
       </Button>
     </Box>
   );

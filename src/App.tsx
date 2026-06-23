@@ -3,6 +3,7 @@ import ChatScreen from './pages/ChatScreen';
 import { useChatStore } from './storage/store';
 import { getTheme } from './theme/theme';
 import { CssBaseline } from '@mui/material';
+import ErrorSnackbar from './ui/SnackBar';
 
 function App() {
 
@@ -11,6 +12,7 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline/>
+      <ErrorSnackbar />
       <ChatScreen />
     </ThemeProvider>
   );

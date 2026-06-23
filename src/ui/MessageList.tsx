@@ -12,12 +12,18 @@ import { useChatStore } from "../storage/store";
 
 export default function MessageList({
   messages,
+  conversationId,
 }: {
   messages: Message[];
+  conversationId: string;
 }) {
   const lastMessageRef = useRef<HTMLDivElement>(null);
-  const loading = useChatStore((s) => s.loading);
+
   const theme = useChatStore((s) => s.theme);
+
+  const loading = useChatStore(
+    (s) => s.loadingByConversation?.[conversationId] || false
+  );
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
@@ -153,7 +159,6 @@ export default function MessageList({
         );
       })}
 
-      {/* typing indicator */}
       {loading && (
         <Box sx={{ display: "flex", mt: 1 }}>
           <Box

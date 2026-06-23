@@ -1,30 +1,43 @@
-import { sendToMistral } from '../api/mistal';
-import { useChatStore } from '../storage/store';
-import type { Message } from './types';
+import { sendToMistral } from '../api/mistral'
+import { useChatStore } from '../storage/store'
+import type { Message } from './types'
 
-export const sendMessageFlow = async (text: string) => {
+const abortControllers: Record<string, AbortController> = {}
+
+export const sendMessageFlow = async (
+  text: string,
+  conversationId: string
+) => {
   const {
     conversations,
-    activeId,
     updateConversation,
-    setLoading,
+    setLoadingForConversation,
     setError,
   } = useChatStore.getState()
 
   if (!text.trim()) return
 
-  setLoading(true)
+  setLoadingForConversation(conversationId, true)
   setError(null)
+
+  if (abortControllers[conversationId]) {
+    abortControllers[conversationId].abort()
+  }
+
+  const controller = new AbortController()
+  abortControllers[conversationId] = controller
 
   try {
     const activeConversation = conversations.find(
-      (c) => c.id === activeId
-    );
+      (c) => c.id === conversationId
+    )
 
-    if (!activeConversation) return;
+    if (!activeConversation) {
+      throw new Error('Conversation not found')
+    }
 
     const isFirstMessage =
-      activeConversation.messages.length === 0;
+      activeConversation.messages.length === 0
 
     const userMessage: Message = {
       id: crypto.randomUUID(),
@@ -34,7 +47,7 @@ export const sendMessageFlow = async (text: string) => {
     }
 
     const updatedMessages = [
-      ...(activeConversation.messages || []),
+      ...activeConversation.messages,
       userMessage,
     ]
 
@@ -53,14 +66,21 @@ export const sendMessageFlow = async (text: string) => {
       }
     }
 
-    updateConversation(updatedConversation);
+    updateConversation(updatedConversation)
 
     const aiResponse = await sendToMistral(updatedMessages)
+
+    const content =
+      aiResponse?.choices?.[0]?.message?.content
+
+    if (!content) {
+      throw new Error('Invalid AI response')
+    }
 
     const aiMessage: Message = {
       id: crypto.randomUUID(),
       role: 'assistant',
-      text: aiResponse.choices[0].message.content,
+      text: content,
       time: Date.now(),
     }
 
@@ -68,15 +88,28 @@ export const sendMessageFlow = async (text: string) => {
       ...updatedConversation,
       messages: [...updatedMessages, aiMessage],
     }
-    updateConversation(finalConversation)
 
-  } catch (error) {
-    console.error(error)
-    setError('Something went wrong')
+    updateConversation(finalConversation)
+  } catch (error: unknown) {
+    if (
+      error instanceof DOMException &&
+      error.name === 'AbortError'
+    ) {
+      return
+    }
+
+    setError(
+      error instanceof Error
+        ? error.message
+        : 'Something went wrong'
+    )
   } finally {
-    setLoading(false)
+    setLoadingForConversation(conversationId, false)
+
+    delete abortControllers[conversationId]
   }
 }
+
 export const editMessageFlow = async (
   messageId: string,
   newText: string
@@ -86,23 +119,31 @@ export const editMessageFlow = async (
     activeId,
     updateConversation,
     setError,
-    setLoading,
+    setLoadingForConversation,
   } = useChatStore.getState()
 
   const activeConversation = conversations.find(
     (c) => c.id === activeId
-  );
+  )
 
   if (!activeConversation) return
 
-  const msgIndex = activeConversation.messages.findIndex(
-    (m) => m.id === messageId
-  )
+  const msgIndex =
+    activeConversation.messages.findIndex(
+      (m) => m.id === messageId
+    )
 
   if (msgIndex === -1) return
 
-  setLoading(true)
+  setLoadingForConversation(activeId, true)
   setError(null)
+
+  if (abortControllers[activeId]) {
+    abortControllers[activeId].abort()
+  }
+
+  const controller = new AbortController()
+  abortControllers[activeId] = controller
 
   try {
     const editedMessages = [
@@ -117,31 +158,45 @@ export const editMessageFlow = async (
       ...activeConversation,
       messages: editedMessages,
     }
-    updateConversation(editedConversation);
-    const aiResponse = await sendToMistral(editedMessages);
+
+    updateConversation(editedConversation)
+
+    const aiResponse = await sendToMistral(editedMessages)
+
+    const content =
+      aiResponse?.choices?.[0]?.message?.content
+
+    if (!content) {
+      throw new Error('Invalid AI response')
+    }
+
     const aiMessage: Message = {
       id: crypto.randomUUID(),
       role: 'assistant',
-      text: aiResponse.choices[0].message.content,
+      text: content,
       time: Date.now(),
     }
 
-    const latestConversation =
-      useChatStore.getState().conversations.find(
-        (c) => c.id === activeId
-      )
-
-    if (!latestConversation) return
-
     updateConversation({
-      ...latestConversation,
+      ...editedConversation,
       messages: [...editedMessages, aiMessage],
     })
+  } catch (error: unknown) {
+    if (
+      error instanceof DOMException &&
+      error.name === 'AbortError'
+    ) {
+      return
+    }
 
-  } catch (error) {
-    console.error(error)
-    setError('Edit failed')
+    setError(
+      error instanceof Error
+        ? error.message
+        : 'Edit failed'
+    )
   } finally {
-    setLoading(false)
+    setLoadingForConversation(activeId, false)
+
+    delete abortControllers[activeId]
   }
 }
