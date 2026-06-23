@@ -14,17 +14,13 @@ import {
 } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from "@mui/icons-material/Edit";
-
-const {
-  deleteConversation,
-} = useChatStore.getState()
-
 import MenuIcon from "@mui/icons-material/Menu";
-
 import { useChatStore } from "../storage/store";
 import { createConversation } from "../functionality/conversation";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import LightModeIcon from "@mui/icons-material/LightMode";
+
+const { deleteConversation } = useChatStore.getState();
 
 export default function ConversationSidebar() {
   const {
@@ -45,12 +41,12 @@ export default function ConversationSidebar() {
   const [snackOpen, setSnackOpen] = useState(false);
 
   useEffect(() => {
-      if (!conversations.length) {
-        handleNewChat();
-      }
+    if (!conversations.length) {
+      handleNewChat();
+    }
   },[])
 
-const handleNewChat = () => {
+  const handleNewChat = () => {
     const activeConversation = conversations.find((c) => c.id === activeId);
 
     if (activeConversation && activeConversation.messages.length === 0) {
@@ -58,13 +54,6 @@ const handleNewChat = () => {
       if (isMobile) setOpen(false);
       return;
     }
-
-    <Snackbar
-      open={snackOpen}
-      autoHideDuration={3000}
-      onClose={() => setSnackOpen(false)}
-      message="New chat already exists"
-    />
 
     const newConv = createConversation();
     const updated = [newConv, ...conversations];
@@ -92,45 +81,45 @@ const handleNewChat = () => {
     setEditText("");
   };
 
-    const saveEdit = async (id: string) => {
-      if (!editText.trim()) return;
-        editChatName(id, editText);
-      cancelEdit();
-    };
+  const saveEdit = async (id: string) => {
+    if (!editText.trim()) return;
+    editChatName(id, editText);
+    cancelEdit();
+  };
 
-    const filteredConversations = conversations.filter((chat) =>
-      chat.title.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredConversations = conversations.filter((chat) =>
+    chat.title.toLowerCase().includes(searchQuery.toLowerCase())
     )
 
-const sidebarContent = (
+  const sidebarContent = (
     <Box
-        sx={{
-          width: 280,
-          maxWidth: "100vw",
-          height: "100dvh",
-          display: "flex",
-          flexDirection: "column",
-          p: 2,
-          boxSizing: "border-box",
-          bgcolor: appTheme === "dark" ? "#1e1e1e" : "#ffffff",
-          color: appTheme === "dark" ? "#ffffff" : "#111111",
-        }}
+      sx={{
+        width: 280,
+        maxWidth: "100vw",
+        height: "100dvh",
+        display: "flex",
+        flexDirection: "column",
+        p: 2,
+        boxSizing: "border-box",
+        bgcolor: appTheme === "dark" ? "#1e1e1e" : "#ffffff",
+        color: appTheme === "dark" ? "#ffffff" : "#111111",
+      }}
     >
-        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: 600,
-                color: appTheme === "dark" ? "#fff" : "#111",
-              }}
-            >
-              Chats
-            </Typography>
-            <IconButton onClick={toggleTheme}>
-                {appTheme === "light" ? <DarkModeIcon /> : <LightModeIcon />}
-            </IconButton>
-        </Box>
-  
+      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: 600,
+            color: appTheme === "dark" ? "#fff" : "#111",
+          }}
+        >
+          Chats
+        </Typography>
+        <IconButton onClick={toggleTheme}>
+          {appTheme === "light" ? <DarkModeIcon /> : <LightModeIcon />}
+        </IconButton>
+      </Box>
+
       <Button
         variant="contained"
         onClick={handleNewChat}
@@ -153,40 +142,40 @@ const sidebarContent = (
       </Button>
 
       <Box sx={{ mb: 2 }}>
-      <TextField
-        value={searchQuery}
-        fullWidth
-        placeholder='Search chats...'
-        onChange={(e) => setSearchQuery(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' && !e.shiftKey) {
+        <TextField
+          value={searchQuery}
+          fullWidth
+          placeholder='Search chats...'
+          onChange={(e) => setSearchQuery(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault()
-            filteredConversations.length > 0 &&
+              filteredConversations.length > 0 &&
               selectChat(filteredConversations[0].id)
-          }
-          if (e.key === 'Escape') {
+            }
+            if (e.key === 'Escape') {
             setSearchQuery('')
-          }
-        }}
-        sx={{
-          '& .MuiOutlinedInput-root': {
-            borderRadius: 2,
-            bgcolor: appTheme === 'dark' ? '#2a2a2a' : '#f7f7f7',
-            color: appTheme === 'dark' ? '#fff' : '#111',
-          },
-          '& .MuiOutlinedInput-notchedOutline': {
-            borderColor: appTheme === 'dark' ? '#3a3a3a' : '#ddd',
-          },
-          '&:hover .MuiOutlinedInput-notchedOutline': {
-            borderColor: appTheme === 'dark' ? '#555' : '#bbb',
-          },
-          '& .MuiInputBase-input': {
-            color: appTheme === 'dark' ? '#fff' : '#111',
-          },
-        }}
-      />
-    </Box>
-  
+            }
+          }}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              borderRadius: 2,
+              bgcolor: appTheme === 'dark' ? '#2a2a2a' : '#f7f7f7',
+              color: appTheme === 'dark' ? '#fff' : '#111',
+            },
+            '& .MuiOutlinedInput-notchedOutline': {
+              borderColor: appTheme === 'dark' ? '#3a3a3a' : '#ddd',
+            },
+            '&:hover .MuiOutlinedInput-notchedOutline': {
+              borderColor: appTheme === 'dark' ? '#555' : '#bbb',
+            },
+            '& .MuiInputBase-input': {
+              color: appTheme === 'dark' ? '#fff' : '#111',
+            },
+          }}
+        />
+      </Box>
+
       <Box
         sx={{
           flex: 1,
@@ -287,7 +276,10 @@ const sidebarContent = (
                     <Box sx={{ display: 'flex', gap: 0.5 }}>
                       <IconButton
                         size='small'
-                        onClick={() => editConversationName(c.id, c.title)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          editConversationName(c.id, c.title)
+                        }}
                         sx={{
                           color: appTheme === 'dark' ? '#bbb' : '#555',
                           '&:hover': {
@@ -300,7 +292,10 @@ const sidebarContent = (
 
                       <IconButton
                         size='small'
-                        onClick={() => removeConversation(c.id)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          removeConversation(c.id)
+                        }}
                         sx={{
                           color: appTheme === 'dark' ? '#bbb' : '#555',
                           '&:hover': {
@@ -320,6 +315,13 @@ const sidebarContent = (
           ))}
         </List>
       </Box>
+
+      <Snackbar
+        open={snackOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackOpen(false)}
+        message="New chat already exists"
+      />
     </Box>
   );
 
