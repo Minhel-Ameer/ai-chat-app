@@ -88,16 +88,9 @@ const handleNewChat = () => {
       cancelEdit();
     };
 
-    const filteredConversations = conversations.filter((chat) => {
-      const query = searchQuery.toLowerCase()
-    
-      return (
-        chat.title.toLowerCase().includes(query) ||
-        chat.messages?.some((msg) =>
-          msg?.text?.toLowerCase().includes(query)
-        )
-      )
-    })
+    const filteredConversations = conversations.filter((chat) =>
+      chat.title.toLowerCase().includes(searchQuery.toLowerCase())
+    )
 
 const sidebarContent = (
     <Box
